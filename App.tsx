@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useLocalStorage } from './hooks/useLocalStorage';
 import type { Vocabulary } from './types';
 import Header from './components/Header';
@@ -33,6 +33,8 @@ function App() {
   const [editingVocabulary, setEditingVocabulary] = useState<Vocabulary | null>(null);
   const [arabicFont, setArabicFont] = useLocalStorage<string>('arabicFont', arabicFonts[0].family);
   const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-arabic', arabicFont);
@@ -45,6 +47,26 @@ function App() {
       document.documentElement.classList.remove('dark');
     }
   }, [theme]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleAddVocabulary = (newItems: Omit<Vocabulary, 'id'>[]) => {
     const itemsWithIds = newItems.map(item => ({
@@ -130,8 +152,13 @@ function App() {
         />
         <button
             onClick={handleOpenAddForm}
-            className="fixed bottom-6 right-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-4 shadow-lg transition-transform transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-900 z-30"
+            className="fixed bottom-6 left-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-4 shadow-lg transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-900 z-30 duration-300"
             aria-label="Tambah Mufrodat Baru"
+            style={{
+              opacity: isScrolling ? 0 : 1,
+              transform: isScrolling ? 'translateY(120px)' : 'translateY(0)',
+              pointerEvents: isScrolling ? 'none' : 'auto'
+            }}
         >
             <PlusIcon className="w-8 h-8" />
         </button>

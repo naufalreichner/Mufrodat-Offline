@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 interface FloatingNavProps {
   currentView: 'list' | 'quiz' | 'flashcard';
@@ -6,6 +6,28 @@ interface FloatingNavProps {
 }
 
 export const FloatingNav: React.FC<FloatingNavProps> = ({ currentView, onViewChange }) => {
+  const [isScrolling, setIsScrolling] = useState(false);
+  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolling(true);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+      scrollTimeoutRef.current = setTimeout(() => {
+        setIsScrolling(false);
+      }, 1000);
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (scrollTimeoutRef.current) {
+        clearTimeout(scrollTimeoutRef.current);
+      }
+    };
+  }, []);
   const getButtonClass = (view: 'list' | 'quiz' | 'flashcard') => {
     return currentView === view
       ? 'bg-emerald-600 text-white'
@@ -13,7 +35,14 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ currentView, onViewCha
   };
 
   return (
-    <div className="fixed bottom-24 left-6 z-30">
+    <div
+      className="fixed bottom-24 left-6 z-30 transition-all duration-300"
+      style={{
+        opacity: isScrolling ? 0 : 1,
+        transform: isScrolling ? 'translateY(-120px)' : 'translateY(0)',
+        pointerEvents: isScrolling ? 'none' : 'auto'
+      }}
+    >
       <div className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm p-1 rounded-lg flex space-x-1 shadow-lg border border-gray-200 dark:border-gray-600">
         <button
           onClick={() => onViewChange('list')}
