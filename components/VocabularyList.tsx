@@ -78,7 +78,7 @@ const VocabularyCard: React.FC<{ item: Vocabulary; onEdit: () => void; onDelete:
 export const VocabularyList: React.FC<VocabularyListProps> = ({ vocabulary, onEdit, onDelete }) => {
   if (vocabulary.length === 0) {
     return (
-      <div className="max-w-3xl mx-auto text-center py-16 px-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
+      <div className="max-w-2xl mx-auto text-center py-16 px-6 bg-white dark:bg-slate-800 rounded-lg shadow-md">
         <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Database Kosong</h2>
         <p className="text-gray-500 dark:text-gray-400">Belum ada mufrodat yang ditambahkan. Klik tombol '+' di pojok kanan bawah untuk memulai.</p>
       </div>
@@ -86,7 +86,7 @@ export const VocabularyList: React.FC<VocabularyListProps> = ({ vocabulary, onEd
   }
 
   return (
-    <div className="max-w-3xl mx-auto space-y-4">
+    <div className="max-w-2xl mx-auto space-y-4">
       {vocabulary.map(item => (
         <VocabularyCard key={item.id} item={item} onEdit={() => onEdit(item)} onDelete={() => onDelete(item.id)} />
       ))}
