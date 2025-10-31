@@ -13,7 +13,7 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ currentView, onViewCha
   };
 
   return (
-    <div className="fixed bottom-6 left-6 z-30">
+    <div className="fixed bottom-24 left-6 z-30">
       <div className="bg-white/70 dark:bg-gray-700/70 backdrop-blur-sm p-1 rounded-lg flex space-x-1 shadow-lg border border-gray-200 dark:border-gray-600">
         <button
           onClick={() => onViewChange('list')}
