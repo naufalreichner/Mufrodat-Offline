@@ -1,0 +1,5 @@
+{
+  "name": "Mufrodat",
+  "description": "An application to manage a personal database of Arabic vocabulary (singular, dual, plural forms) and language notes, featuring an AI-powered quiz generator to test your knowledge.",
+  "requestFramePermissions": []
+}
