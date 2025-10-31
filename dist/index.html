@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kamus Mufrodat Arab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Amiri:ital,wght@0,400;0,700;1,400;1,700&family=Cairo:wght@200..1000&family=Lateef:wght@200;300;400;500;600;700;800&family=Lemonada:wght@300..700&family=Markazi+Text:wght@400..700&family=Noto+Kufi+Arabic:wght@100..900&family=Noto+Naskh+Arabic:wght@400..700&family=Reem+Kufi:wght@400..700&family=Scheherazade+New:wght@400;500;600;700&family=Tajawal:wght@200;300;400;500;700;800;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --font-arabic: 'Noto Naskh Arabic', serif;
+    }
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-arabic {
+      font-family: var(--font-arabic);
+    }
+    /* For custom scrollbar in modal */
+    .modal-scroll::-webkit-scrollbar {
+        width: 8px;
+    }
+    .modal-scroll::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .modal-scroll::-webkit-scrollbar-thumb {
+        background-color: #a0aec0;
+        border-radius: 10px;
+        border: 3px solid transparent;
+        background-clip: content-box;
+    }
+    .dark .modal-scroll::-webkit-scrollbar-thumb {
+        background-color: #4a5568;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      darkMode: 'class', // or 'media'
+      theme: {
+        extend: {
+          // ...
+        }
+      }
+    }
+  </script>
+
+<link rel="stylesheet" href="/index.css">
+  <script type="importmap">
+  {
+    "imports": {
+      "react": "https://aistudiocdn.com/react@^19.2.0",
+      "react/": "https://aistudiocdn.com/react@^19.2.0/",
+      "@google/genai": "https://aistudiocdn.com/@google/genai@^1.2.7.0",
+      "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+      "gemini-api-key": "data:text/plain,AIzaSyAZczq8sBJKsS3-4W9M8I2yhMLSPO4EjuM"
+    }
+  }
+  </script>
+  <script type="module" crossorigin src="/assets/index-Dt39Yudt.js"></script>
+</head>
+<body class="bg-gray-50 dark:bg-gray-900">
+  <div id="root"></div>
+</body>
+</html>
