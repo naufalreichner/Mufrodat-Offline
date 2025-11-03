@@ -35,6 +35,8 @@ function App() {
   const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchLang, setSearchLang] = useState<'ar' | 'id'>('id');
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-arabic', arabicFont);
@@ -104,6 +106,25 @@ function App() {
     setEditingVocabulary(null);
   };
 
+  const handleSearch = (query: string, language: 'ar' | 'id') => {
+    setSearchQuery(query);
+    setSearchLang(language);
+  };
+
+  const getFilteredVocabulary = () => {
+    if (!searchQuery.trim()) return vocabulary;
+
+    const query = searchQuery.toLowerCase();
+
+    return vocabulary.filter(item => {
+      if (searchLang === 'id') {
+        return item.meaning.toLowerCase().includes(query) || item.notes.toLowerCase().includes(query);
+      } else {
+        return item.singular.includes(searchQuery) || item.dual.includes(searchQuery) || item.plural.includes(searchQuery);
+      }
+    });
+  };
+
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen font-sans">
       <Header
@@ -112,12 +133,13 @@ function App() {
         onFontChange={setArabicFont}
         theme={theme}
         onThemeChange={setTheme}
+        onSearch={handleSearch}
       />
       
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
         {currentView === 'list' && (
           <VocabularyList
-            vocabulary={vocabulary}
+            vocabulary={getFilteredVocabulary()}
             onEdit={handleEditClick}
             onDelete={handleDeleteVocabulary}
           />
