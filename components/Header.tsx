@@ -13,54 +13,34 @@ interface HeaderProps {
   onFontChange: (fontFamily: string) => void;
   theme: 'light' | 'dark';
   onThemeChange: (theme: 'light' | 'dark') => void;
-  onSearch?: (query: string, language: 'ar' | 'id') => void;
+  onSearch?: (query: string) => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ fonts, selectedFont, onFontChange, theme, onThemeChange, onSearch }) => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchLang, setSearchLang] = useState<'ar' | 'id'>('id');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const query = e.target.value;
     setSearchQuery(query);
-    onSearch?.(query, searchLang);
+    onSearch?.(query);
   };
 
-  const handleSearchLangChange = (lang: 'ar' | 'id') => {
-    setSearchLang(lang);
-    onSearch?.(searchQuery, lang);
-  };
   return (
     <header className="bg-white dark:bg-gray-800/80 dark:backdrop-blur-sm shadow-sm dark:shadow-gray-700/20 sticky top-0 z-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <h1 className="text-xl sm:text-2xl font-bold text-emerald-700 dark:text-emerald-500 tracking-tight font-arabic">
+        <div className="flex items-center gap-2 h-16">
+          <h1 className="text-lg sm:text-xl font-bold text-emerald-700 dark:text-emerald-500 tracking-tight font-arabic whitespace-nowrap">
             زيادة
           </h1>
-          <div className="flex-1 max-w-md mx-4">
-            <div className="flex items-center space-x-2">
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={handleSearchChange}
-                placeholder="Cari mufrodat..."
-                className="flex-1 px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              />
-              <select
-                value={searchLang}
-                onChange={(e) => handleSearchLangChange(e.target.value as 'ar' | 'id')}
-                className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-1.5 pl-2 pr-6 text-xs text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-emerald-500"
-              >
-                <option value="id">Indo</option>
-                <option value="ar">Arab</option>
-              </select>
-              <div className="pointer-events-none absolute ml-16 flex items-center px-1 text-gray-700 dark:text-gray-400">
-                <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-              </div>
-            </div>
-          </div>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={handleSearchChange}
+            placeholder="Cari..."
+            className="flex-1 max-w-xs px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+          />
 
-          <div className="flex items-center space-x-2">
+          <div className="flex items-center gap-2 ml-auto">
             <div className="relative">
               <select
                 value={selectedFont}

@@ -36,7 +36,6 @@ function App() {
   const [isScrolling, setIsScrolling] = useState(false);
   const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchLang, setSearchLang] = useState<'ar' | 'id'>('id');
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-arabic', arabicFont);
@@ -106,9 +105,8 @@ function App() {
     setEditingVocabulary(null);
   };
 
-  const handleSearch = (query: string, language: 'ar' | 'id') => {
+  const handleSearch = (query: string) => {
     setSearchQuery(query);
-    setSearchLang(language);
   };
 
   const getFilteredVocabulary = () => {
@@ -117,11 +115,9 @@ function App() {
     const query = searchQuery.toLowerCase();
 
     return vocabulary.filter(item => {
-      if (searchLang === 'id') {
-        return item.meaning.toLowerCase().includes(query) || item.notes.toLowerCase().includes(query);
-      } else {
-        return item.singular.includes(searchQuery) || item.dual.includes(searchQuery) || item.plural.includes(searchQuery);
-      }
+      const arabicMatch = item.singular.includes(searchQuery) || item.dual.includes(searchQuery) || item.plural.includes(searchQuery);
+      const indoMatch = item.meaning.toLowerCase().includes(query) || item.notes.toLowerCase().includes(query);
+      return arabicMatch || indoMatch;
     });
   };
 
