@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import type { Vocabulary, QuizQuestion } from '../types';
 
 type QuizState = 'idle' | 'active' | 'finished';
-type QuizSource = 'first5' | 'last5' | 'all';
+type QuizSource = 'first10' | 'last10' | 'all';
 
 const generateLocalQuiz = (sourceVocabulary: Vocabulary[], allVocabulary: Vocabulary[]): QuizQuestion[] => {
   const questions: QuizQuestion[] = [];
@@ -76,19 +76,17 @@ export const QuizView: React.FC<{ vocabularyList: Vocabulary[] }> = ({ vocabular
   const [selectedAnswer, setSelectedAnswer] = useState<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [quizSource, setQuizSource] = useState<QuizSource>('all');
+  const [quizSource, setQuizSource] = useState<QuizSource>('first10');
 
   const startQuiz = () => {
     let selectedVocabulary: Vocabulary[];
 
     switch (quizSource) {
-      case 'first5':
-        // New items are prepended, so the first 5 are the newest
-        selectedVocabulary = vocabularyList.slice(0, 5);
+      case 'first10':
+        selectedVocabulary = vocabularyList.slice(0, 10);
         break;
-      case 'last5':
-        // The last 5 items are the oldest
-        selectedVocabulary = vocabularyList.slice(-5);
+      case 'last10':
+        selectedVocabulary = vocabularyList.slice(-10);
         break;
       case 'all':
       default:
@@ -226,11 +224,11 @@ export const QuizView: React.FC<{ vocabularyList: Vocabulary[] }> = ({ vocabular
                       <div className="my-6">
                         <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">Pilih sumber soal:</label>
                         <div className="inline-flex rounded-md shadow-sm" role="group">
-                          <button type="button" onClick={() => setQuizSource('first5')} className={`px-4 py-2 text-sm font-medium rounded-l-lg border transition-colors ${getSourceButtonClass('first5')}`}>
-                              5 Kata Awal (Terbaru)
+                          <button type="button" onClick={() => setQuizSource('first10')} className={`px-4 py-2 text-sm font-medium rounded-l-lg border transition-colors ${getSourceButtonClass('first10')}`}>
+                              10 Kata Awal
                           </button>
-                          <button type="button" onClick={() => setQuizSource('last5')} className={`px-4 py-2 text-sm font-medium border-t border-b -ml-px transition-colors ${getSourceButtonClass('last5')}`}>
-                              5 Kata Terakhir (Terlama)
+                          <button type="button" onClick={() => setQuizSource('last10')} className={`px-4 py-2 text-sm font-medium border-t border-b -ml-px transition-colors ${getSourceButtonClass('last10')}`}>
+                              10 Kata Terakhir
                           </button>
                           <button type="button" onClick={() => setQuizSource('all')} className={`px-4 py-2 text-sm font-medium rounded-r-md border -ml-px transition-colors ${getSourceButtonClass('all')}`}>
                               Seluruh Kata

@@ -1,22 +1,12 @@
 import React, { useState } from 'react';
-import { SunIcon } from './icons/SunIcon';
-import { MoonIcon } from './icons/MoonIcon';
-
-interface Font {
-  name: string;
-  family: string;
-}
+import { SettingsIcon } from './icons/SettingsIcon';
 
 interface HeaderProps {
-  fonts: Font[];
-  selectedFont: string;
-  onFontChange: (fontFamily: string) => void;
-  theme: 'light' | 'dark';
-  onThemeChange: (theme: 'light' | 'dark') => void;
   onSearch?: (query: string) => void;
+  onSettingsClick: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ fonts, selectedFont, onFontChange, theme, onThemeChange, onSearch }) => {
+const Header: React.FC<HeaderProps> = ({ onSearch, onSettingsClick }) => {
   const [searchQuery, setSearchQuery] = useState('');
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -37,36 +27,16 @@ const Header: React.FC<HeaderProps> = ({ fonts, selectedFont, onFontChange, them
             value={searchQuery}
             onChange={handleSearchChange}
             placeholder="Cari..."
-            className="flex-1 max-w-xs px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
+            className="flex-1 max-w-[150px] px-2 py-1 text-xs border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-emerald-500"
           />
 
-          <div className="flex items-center gap-2 ml-auto">
-            <div className="relative">
-              <select
-                value={selectedFont}
-                onChange={(e) => onFontChange(e.target.value)}
-                className="appearance-none bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-md py-1.5 pl-2 pr-6 text-xs text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-1 focus:ring-emerald-500 focus:border-emerald-500"
-                aria-label="Pilih Font Arab"
-              >
-                {fonts.map(font => (
-                  <option key={font.name} value={font.family} style={{ fontFamily: font.family }}>
-                    {font.name}
-                  </option>
-                ))}
-              </select>
-              <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700 dark:text-gray-400">
-                <svg className="fill-current h-3 w-3" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20"><path d="M9.293 12.95l.707.707L15.657 8l-1.414-1.414L10 10.828 5.757 6.586 4.343 8z"/></svg>
-              </div>
-            </div>
-
-            <button
-              onClick={() => onThemeChange(theme === 'light' ? 'dark' : 'light')}
-              className="p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-800 transition-colors"
-              aria-label="Ganti Tema"
-            >
-              {theme === 'light' ? <MoonIcon className="w-5 h-5" /> : <SunIcon className="w-5 h-5" />}
-            </button>
-          </div>
+          <button
+            onClick={onSettingsClick}
+            className="ml-auto p-2 rounded-full text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-800 transition-colors"
+            aria-label="Pengaturan"
+          >
+            <SettingsIcon className="w-5 h-5" />
+          </button>
         </div>
       </div>
     </header>

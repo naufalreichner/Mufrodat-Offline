@@ -7,8 +7,8 @@ import { VocabularyList } from './components/VocabularyList';
 import { AddVocabularyForm } from './components/AddVocabularyForm';
 import { QuizView } from './components/QuizView';
 import { FlashcardView } from './components/FlashcardView';
-import { PlusIcon } from './components/icons/PlusIcon';
 import { FloatingNav } from './components/FloatingNav';
+import { SettingsModal } from './components/SettingsModal';
 
 type View = 'list' | 'quiz' | 'flashcard';
 type Theme = 'light' | 'dark';
@@ -33,9 +33,8 @@ function App() {
   const [editingVocabulary, setEditingVocabulary] = useState<Vocabulary | null>(null);
   const [arabicFont, setArabicFont] = useLocalStorage<string>('arabicFont', arabicFonts[0].family);
   const [theme, setTheme] = useLocalStorage<Theme>('theme', 'light');
-  const [isScrolling, setIsScrolling] = useState(false);
-  const scrollTimeoutRef = useRef<NodeJS.Timeout>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--font-arabic', arabicFont);
@@ -49,25 +48,6 @@ function App() {
     }
   }, [theme]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolling(true);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-      scrollTimeoutRef.current = setTimeout(() => {
-        setIsScrolling(false);
-      }, 1000);
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => {
-      window.removeEventListener('scroll', handleScroll);
-      if (scrollTimeoutRef.current) {
-        clearTimeout(scrollTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleAddVocabulary = (newItems: Omit<Vocabulary, 'id'>[]) => {
     const itemsWithIds = newItems.map(item => ({
@@ -124,12 +104,8 @@ function App() {
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen font-sans">
       <Header
-        fonts={arabicFonts}
-        selectedFont={arabicFont}
-        onFontChange={setArabicFont}
-        theme={theme}
-        onThemeChange={setTheme}
         onSearch={handleSearch}
+        onSettingsClick={() => setIsSettingsOpen(true)}
       />
       
       <main className="container mx-auto p-4 sm:p-6 lg:p-8 pb-24">
@@ -163,24 +139,21 @@ function App() {
         </div>
       )}
 
-      <>
-        <FloatingNav
-            currentView={currentView}
-            onViewChange={setCurrentView}
-        />
-        <button
-            onClick={handleOpenAddForm}
-            className="fixed bottom-6 left-6 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full p-4 shadow-lg transition-all transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-emerald-500 dark:focus:ring-offset-gray-900 z-30 duration-300"
-            aria-label="Tambah Mufrodat Baru"
-            style={{
-              opacity: isScrolling ? 0 : 1,
-              transform: isScrolling ? 'translateY(120px)' : 'translateY(0)',
-              pointerEvents: isScrolling ? 'none' : 'auto'
-            }}
-        >
-            <PlusIcon className="w-8 h-8" />
-        </button>
-      </>
+      <FloatingNav
+        currentView={currentView}
+        onViewChange={setCurrentView}
+        onAddClick={handleOpenAddForm}
+      />
+
+      <SettingsModal
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        fonts={arabicFonts}
+        selectedFont={arabicFont}
+        onFontChange={setArabicFont}
+        theme={theme}
+        onThemeChange={setTheme}
+      />
     </div>
   );
 }
