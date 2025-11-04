@@ -96,6 +96,12 @@ export const SettingsModal: React.FC<SettingsModalProps> = ({
             Tutup
           </button>
         </div>
+
+        <div className="mt-8 pt-6 border-t dark:border-slate-700 text-center">
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            Crafted by <span className="font-semibold">Naufal&Co</span> - Powered By <span className="font-semibold">Bolt</span>
+          </p>
+        </div>
       </div>
     </div>
   );
