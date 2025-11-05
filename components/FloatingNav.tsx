@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 
 interface FloatingNavProps {
-  currentView: 'list' | 'quiz' | 'flashcard';
-  onViewChange: (view: 'list' | 'quiz' | 'flashcard') => void;
+  currentView: 'list' | 'quiz' | 'unscramble' | 'flashcard';
+  onViewChange: (view: 'list' | 'quiz' | 'unscramble' | 'flashcard') => void;
   onAddClick: () => void;
 }
 
@@ -75,6 +75,13 @@ export const FloatingNav: React.FC<FloatingNavProps> = ({ currentView, onViewCha
           aria-label="Mulai Kuis"
         >
           Kuis
+        </button>
+        <button
+          onClick={() => onViewChange('unscramble')}
+          className={`px-3 py-2 text-xs font-semibold rounded-md transition-colors duration-200 ${getButtonClass('unscramble')}`}
+          aria-label="Kuis Susun Kata"
+        >
+          Susun Kata
         </button>
       </div>
     </div>

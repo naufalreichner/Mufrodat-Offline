@@ -6,11 +6,12 @@ import Header from './components/Header';
 import { VocabularyList } from './components/VocabularyList';
 import { AddVocabularyForm } from './components/AddVocabularyForm';
 import { QuizView } from './components/QuizView';
+import { WordUnscrambleQuiz } from './components/WordUnscrambleQuiz';
 import { FlashcardView } from './components/FlashcardView';
 import { FloatingNav } from './components/FloatingNav';
 import { SettingsModal } from './components/SettingsModal';
 
-type View = 'list' | 'quiz' | 'flashcard';
+type View = 'list' | 'quiz' | 'unscramble' | 'flashcard';
 type Theme = 'light' | 'dark';
 
 const arabicFonts = [
@@ -117,6 +118,7 @@ function App() {
           />
         )}
         {currentView === 'quiz' && <QuizView vocabularyList={vocabulary} />}
+        {currentView === 'unscramble' && <WordUnscrambleQuiz vocabularyList={vocabulary} />}
         {currentView === 'flashcard' && <FlashcardView vocabularyList={vocabulary} />}
       </main>
 
