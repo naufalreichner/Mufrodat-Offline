@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import type { Vocabulary } from '../types';
 
 type QuizState = 'gameSelect' | 'active' | 'finished';
@@ -6,16 +6,16 @@ type QuizSource = 'first10' | 'last10' | 'all';
 
 interface UnscrambleQuestion {
   correctAnswer: string;
-  scrambled: string;
+  scrambledLetters: string[];
 }
 
-const shuffleString = (str: string): string => {
-  const arr = str.split('');
-  for (let i = arr.length - 1; i > 0; i--) {
+const shuffleArray = <T,>(arr: T[]): T[] => {
+  const newArr = [...arr];
+  for (let i = newArr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [arr[i], arr[j]] = [arr[j], arr[i]];
+    [newArr[i], newArr[j]] = [newArr[j], newArr[i]];
   }
-  return arr.join('');
+  return newArr;
 };
 
 const generateUnscrambleQuiz = (sourceVocabulary: Vocabulary[]): UnscrambleQuestion[] => {
@@ -24,19 +24,20 @@ const generateUnscrambleQuiz = (sourceVocabulary: Vocabulary[]): UnscrambleQuest
   for (const vocabItem of sourceVocabulary) {
     if (!vocabItem.singular) continue;
 
-    const scrambled = shuffleString(vocabItem.singular);
+    const letters = vocabItem.singular.split('');
+    const scrambledLetters = shuffleArray(letters);
 
-    if (scrambled === vocabItem.singular) {
-      const secondScramble = shuffleString(vocabItem.singular);
-      if (secondScramble === vocabItem.singular) continue;
+    if (scrambledLetters.join('') === vocabItem.singular) {
+      const secondScramble = shuffleArray(letters);
+      if (secondScramble.join('') === vocabItem.singular) continue;
       questions.push({
         correctAnswer: vocabItem.singular,
-        scrambled: secondScramble,
+        scrambledLetters: secondScramble,
       });
     } else {
       questions.push({
         correctAnswer: vocabItem.singular,
-        scrambled,
+        scrambledLetters,
       });
     }
   }
@@ -49,7 +50,8 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
   const [questions, setQuestions] = useState<UnscrambleQuestion[]>([]);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
-  const [userAnswer, setUserAnswer] = useState('');
+  const [userAnswer, setUserAnswer] = useState<string[]>([]);
+  const [availableLetters, setAvailableLetters] = useState<string[]>([]);
   const [isAnswered, setIsAnswered] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [quizSource, setQuizSource] = useState<QuizSource>('first10');
@@ -77,7 +79,8 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
       setQuestions(newQuestions);
       setCurrentQuestionIndex(0);
       setScore(0);
-      setUserAnswer('');
+      setUserAnswer([]);
+      setAvailableLetters([...newQuestions[0].scrambledLetters]);
       setIsAnswered(false);
       setQuizState('active');
     } else {
@@ -86,35 +89,48 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
     }
   };
 
-  const handleAnswerSubmit = () => {
-    if (!userAnswer.trim()) return;
+  const handleLetterClick = (letter: string, index: number) => {
+    if (isAnswered) return;
+    setUserAnswer([...userAnswer, letter]);
+    setAvailableLetters(availableLetters.filter((_, i) => i !== index));
+  };
 
+  const handleRemoveLetter = (index: number) => {
+    const removedLetter = userAnswer[index];
+    setUserAnswer(userAnswer.filter((_, i) => i !== index));
+    setAvailableLetters([...availableLetters, removedLetter]);
+  };
+
+  const handleAnswerSubmit = () => {
+    const answer = userAnswer.join('');
     setIsAnswered(true);
-    if (userAnswer.trim() === questions[currentQuestionIndex].correctAnswer) {
+    if (answer === questions[currentQuestionIndex].correctAnswer) {
       setScore(s => s + 1);
     }
   };
 
   const handleNextQuestion = () => {
     if (currentQuestionIndex < questions.length - 1) {
-      setCurrentQuestionIndex(i => i + 1);
-      setUserAnswer('');
+      const nextIndex = currentQuestionIndex + 1;
+      setCurrentQuestionIndex(nextIndex);
+      setUserAnswer([]);
+      setAvailableLetters([...questions[nextIndex].scrambledLetters]);
       setIsAnswered(false);
     } else {
       setQuizState('finished');
     }
   };
 
-  const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === 'Enter' && !isAnswered) {
-      handleAnswerSubmit();
-    }
+  const handleClear = () => {
+    setAvailableLetters([...questions[currentQuestionIndex].scrambledLetters]);
+    setUserAnswer([]);
   };
 
   const restartQuiz = () => {
     setQuizState('gameSelect');
     setQuestions([]);
-    setUserAnswer('');
+    setUserAnswer([]);
+    setAvailableLetters([]);
   };
 
   const getSourceButtonClass = (source: QuizSource) => {
@@ -127,38 +143,63 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
     switch (quizState) {
       case 'active':
         const currentQuestion = questions[currentQuestionIndex];
-        const isCorrect = userAnswer === currentQuestion.correctAnswer;
+        const userAnswerStr = userAnswer.join('');
+        const isCorrect = userAnswerStr === currentQuestion.correctAnswer;
 
         return (
           <div>
             <div className="mb-6 text-center">
               <p className="text-sm text-gray-500 dark:text-gray-400">Soal {currentQuestionIndex + 1} dari {questions.length}</p>
-              <h2 className="text-xl md:text-2xl font-semibold mt-1 text-gray-800 dark:text-gray-100">Susun Kata Berikut</h2>
+              <h2 className="text-xl md:text-2xl font-semibold mt-1 text-gray-800 dark:text-gray-100">Susun Huruf Arab</h2>
             </div>
 
-            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 text-center mb-6">
-              <p className="text-gray-600 dark:text-gray-300 text-sm mb-3">Acak Huruf:</p>
-              <p className="font-arabic text-4xl text-blue-600 dark:text-blue-400 font-bold break-words">{currentQuestion.scrambled}</p>
+            <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Jawaban Anda:</p>
+              <div className="min-h-16 bg-white dark:bg-slate-700 rounded-lg p-4 border-2 border-gray-200 dark:border-slate-600 flex flex-wrap items-center gap-2">
+                {userAnswer.length === 0 ? (
+                  <p className="text-gray-400 dark:text-gray-500 text-sm">Klik huruf di bawah untuk menyusun...</p>
+                ) : (
+                  userAnswer.map((letter, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleRemoveLetter(index)}
+                      className="font-arabic text-2xl bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-lg transition-colors border-2 border-emerald-300 dark:border-emerald-700 cursor-pointer"
+                    >
+                      {letter}
+                    </button>
+                  ))
+                )}
+              </div>
             </div>
 
-            <div className="mb-6">
-              <input
-                type="text"
-                value={userAnswer}
-                onChange={(e) => setUserAnswer(e.target.value)}
-                onKeyPress={handleKeyPress}
-                placeholder="Ketik jawaban di sini..."
-                disabled={isAnswered}
-                className="w-full font-arabic text-2xl p-4 border-2 rounded-lg bg-white dark:bg-slate-700 border-gray-300 dark:border-slate-600 text-gray-800 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 disabled:bg-gray-100 dark:disabled:bg-slate-600 disabled:opacity-50"
-              />
+            <div className="bg-amber-50 dark:bg-amber-900/20 border-2 border-amber-300 dark:border-amber-700 rounded-lg p-6 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Klik huruf untuk memilih:</p>
+              <div className="flex flex-wrap gap-2 justify-center">
+                {availableLetters.map((letter, index) => (
+                  <button
+                    key={index}
+                    onClick={() => handleLetterClick(letter, index)}
+                    disabled={isAnswered}
+                    className="font-arabic text-2xl bg-white dark:bg-slate-700 hover:bg-amber-100 dark:hover:bg-amber-900/30 text-gray-800 dark:text-gray-200 hover:text-amber-700 dark:hover:text-amber-400 px-4 py-2 rounded-lg transition-colors border-2 border-gray-300 dark:border-slate-600 hover:border-amber-400 dark:hover:border-amber-600 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {letter}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {!isAnswered && (
-              <div className="text-center">
+              <div className="flex gap-3 justify-center">
+                <button
+                  onClick={handleClear}
+                  className="bg-gray-500 hover:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg transition-colors"
+                >
+                  Hapus Semua
+                </button>
                 <button
                   onClick={handleAnswerSubmit}
-                  disabled={!userAnswer.trim()}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-8 rounded-lg transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
+                  disabled={userAnswer.length === 0}
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-6 rounded-lg transition-colors disabled:bg-gray-400 dark:disabled:bg-gray-500 disabled:cursor-not-allowed"
                 >
                   Periksa Jawaban
                 </button>
@@ -179,7 +220,7 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
                 )}
                 <button
                   onClick={handleNextQuestion}
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-8 rounded-lg transition-colors"
+                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-8 rounded-lg transition-colors mt-4"
                 >
                   {currentQuestionIndex < questions.length - 1 ? 'Soal Berikutnya' : 'Selesai'}
                 </button>
@@ -212,7 +253,7 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
           <div className="text-center">
             <h2 className="text-2xl font-bold text-gray-700 dark:text-gray-200 mb-2">Kuis Susun Kata</h2>
             <p className="text-gray-500 dark:text-gray-400 mb-6 max-w-md mx-auto">
-              Susun huruf yang acak menjadi kata yang benar!
+              Klik huruf-huruf acak untuk menyusun menjadi kata Arab yang benar!
             </p>
             {error && <p className="text-red-500 dark:text-red-300 bg-red-100 dark:bg-red-900/40 p-3 rounded-md mb-4">{error}</p>}
 
