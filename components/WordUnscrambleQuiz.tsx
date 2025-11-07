@@ -7,7 +7,99 @@ type QuizSource = 'first10' | 'last10' | 'all';
 interface UnscrambleQuestion {
   correctAnswer: string;
   scrambledLetters: string[];
+  meaning: string;
 }
+
+const arabicLetterShapes: { [key: string]: { isolated: string; initial: string; medial: string; final: string } } = {
+  'ا': { isolated: 'ا', initial: 'ا', medial: 'ا', final: 'ا' },
+  'ب': { isolated: 'ب', initial: 'بـ', medial: 'ـبـ', final: 'ـب' },
+  'ت': { isolated: 'ت', initial: 'تـ', medial: 'ـتـ', final: 'ـت' },
+  'ث': { isolated: 'ث', initial: 'ثـ', medial: 'ـثـ', final: 'ـث' },
+  'ج': { isolated: 'ج', initial: 'جـ', medial: 'ـجـ', final: 'ـج' },
+  'ح': { isolated: 'ح', initial: 'حـ', medial: 'ـحـ', final: 'ـح' },
+  'خ': { isolated: 'خ', initial: 'خـ', medial: 'ـخـ', final: 'ـخ' },
+  'د': { isolated: 'د', initial: 'د', medial: 'د', final: 'ـد' },
+  'ذ': { isolated: 'ذ', initial: 'ذ', medial: 'ذ', final: 'ـذ' },
+  'ر': { isolated: 'ر', initial: 'ر', medial: 'ر', final: 'ـر' },
+  'ز': { isolated: 'ز', initial: 'ز', medial: 'ز', final: 'ـز' },
+  'س': { isolated: 'س', initial: 'سـ', medial: 'ـسـ', final: 'ـس' },
+  'ش': { isolated: 'ش', initial: 'شـ', medial: 'ـشـ', final: 'ـش' },
+  'ص': { isolated: 'ص', initial: 'صـ', medial: 'ـصـ', final: 'ـص' },
+  'ض': { isolated: 'ض', initial: 'ضـ', medial: 'ـضـ', final: 'ـض' },
+  'ط': { isolated: 'ط', initial: 'طـ', medial: 'ـطـ', final: 'ـط' },
+  'ظ': { isolated: 'ظ', initial: 'ظـ', medial: 'ـظـ', final: 'ـظ' },
+  'ع': { isolated: 'ع', initial: 'عـ', medial: 'ـعـ', final: 'ـع' },
+  'غ': { isolated: 'غ', initial: 'غـ', medial: 'ـغـ', final: 'ـغ' },
+  'ف': { isolated: 'ف', initial: 'فـ', medial: 'ـفـ', final: 'ـف' },
+  'ق': { isolated: 'ق', initial: 'قـ', medial: 'ـقـ', final: 'ـق' },
+  'ك': { isolated: 'ك', initial: 'كـ', medial: 'ـكـ', final: 'ـك' },
+  'ل': { isolated: 'ل', initial: 'لـ', medial: 'ـلـ', final: 'ـل' },
+  'م': { isolated: 'م', initial: 'مـ', medial: 'ـمـ', final: 'ـم' },
+  'ن': { isolated: 'ن', initial: 'نـ', medial: 'ـنـ', final: 'ـن' },
+  'ه': { isolated: 'ه', initial: 'هـ', medial: 'ـهـ', final: 'ـه' },
+  'و': { isolated: 'و', initial: 'و', medial: 'و', final: 'ـو' },
+  'ي': { isolated: 'ي', initial: 'يـ', medial: 'ـيـ', final: 'ـي' },
+};
+
+const getBaseCharacter = (char: string): string => {
+  return char.replace(/[\u064B-\u065F]/g, '');
+};
+
+const hasConnectingForm = (char: string): boolean => {
+  const baseChar = getBaseCharacter(char);
+  return baseChar !== 'ا' && baseChar !== 'د' && baseChar !== 'ذ' && baseChar !== 'ر' && baseChar !== 'ز' && baseChar !== 'و';
+};
+
+const getLetterShape = (letter: string, position: 'start' | 'middle' | 'end' | 'isolated'): string => {
+  const baseChar = getBaseCharacter(letter);
+  const haraka = letter.replace(/[^\u064B-\u065F]/g, '');
+
+  const shapes = arabicLetterShapes[baseChar];
+  if (!shapes) return letter;
+
+  let shape = '';
+  if (position === 'start') shape = shapes.initial;
+  else if (position === 'middle') shape = shapes.medial;
+  else if (position === 'end') shape = shapes.final;
+  else shape = shapes.isolated;
+
+  return shape + haraka;
+};
+
+const applyArabicConnections = (word: string): string => {
+  const chars = word.split('');
+  const result: string[] = [];
+
+  for (let i = 0; i < chars.length; i++) {
+    const char = chars[i];
+    const baseChar = getBaseCharacter(char);
+    const haraka = char.replace(/[^\u064B-\u065F]/g, '');
+
+    const isStart = i === 0;
+    const isEnd = i === chars.length - 1;
+    const prevConnects = i > 0 && hasConnectingForm(chars[i - 1]);
+    const nextConnects = i < chars.length - 1 && hasConnectingForm(chars[i + 1]);
+
+    let position: 'start' | 'middle' | 'end' | 'isolated' = 'isolated';
+
+    if (!hasConnectingForm(char)) {
+      position = 'isolated';
+    } else if (isStart) {
+      position = nextConnects ? 'start' : 'isolated';
+    } else if (isEnd) {
+      position = prevConnects ? 'end' : 'isolated';
+    } else {
+      if (prevConnects && nextConnects) position = 'middle';
+      else if (prevConnects) position = 'end';
+      else if (nextConnects) position = 'start';
+      else position = 'isolated';
+    }
+
+    result.push(getLetterShape(char, position));
+  }
+
+  return result.join('');
+};
 
 const shuffleArray = <T,>(arr: T[]): T[] => {
   const newArr = [...arr];
@@ -22,7 +114,7 @@ const generateUnscrambleQuiz = (sourceVocabulary: Vocabulary[]): UnscrambleQuest
   const questions: UnscrambleQuestion[] = [];
 
   for (const vocabItem of sourceVocabulary) {
-    if (!vocabItem.singular) continue;
+    if (!vocabItem.singular || !vocabItem.meaning) continue;
 
     const letters = vocabItem.singular.split('');
     const scrambledLetters = shuffleArray(letters);
@@ -33,11 +125,13 @@ const generateUnscrambleQuiz = (sourceVocabulary: Vocabulary[]): UnscrambleQuest
       questions.push({
         correctAnswer: vocabItem.singular,
         scrambledLetters: secondScramble,
+        meaning: vocabItem.meaning,
       });
     } else {
       questions.push({
         correctAnswer: vocabItem.singular,
         scrambledLetters,
+        meaning: vocabItem.meaning,
       });
     }
   }
@@ -145,6 +239,7 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
         const currentQuestion = questions[currentQuestionIndex];
         const userAnswerStr = userAnswer.join('');
         const isCorrect = userAnswerStr === currentQuestion.correctAnswer;
+        const displayedWord = applyArabicConnections(userAnswerStr);
 
         return (
           <div>
@@ -153,21 +248,31 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
               <h2 className="text-xl md:text-2xl font-semibold mt-1 text-gray-800 dark:text-gray-100">Susun Huruf Arab</h2>
             </div>
 
+            <div className="bg-green-50 dark:bg-green-900/20 border-2 border-green-300 dark:border-green-700 rounded-lg p-4 mb-6">
+              <p className="text-gray-600 dark:text-gray-300 text-sm mb-2">Arti:</p>
+              <p className="text-lg font-semibold text-gray-800 dark:text-gray-100">{currentQuestion.meaning}</p>
+            </div>
+
             <div className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-300 dark:border-blue-700 rounded-lg p-6 mb-6">
               <p className="text-gray-600 dark:text-gray-300 text-sm mb-4">Jawaban Anda:</p>
-              <div className="min-h-16 bg-white dark:bg-slate-700 rounded-lg p-4 border-2 border-gray-200 dark:border-slate-600 flex flex-wrap items-center gap-2">
+              <div className="min-h-16 bg-white dark:bg-slate-700 rounded-lg p-4 border-2 border-gray-200 dark:border-slate-600 flex flex-wrap items-center justify-center gap-1">
                 {userAnswer.length === 0 ? (
                   <p className="text-gray-400 dark:text-gray-500 text-sm">Klik huruf di bawah untuk menyusun...</p>
                 ) : (
-                  userAnswer.map((letter, index) => (
-                    <button
-                      key={index}
-                      onClick={() => handleRemoveLetter(index)}
-                      className="font-arabic text-2xl bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 px-4 py-2 rounded-lg transition-colors border-2 border-emerald-300 dark:border-emerald-700 cursor-pointer"
-                    >
-                      {letter}
-                    </button>
-                  ))
+                  <div>
+                    <p className="font-arabic text-4xl text-blue-600 dark:text-blue-400 font-bold text-center mb-3">{displayedWord}</p>
+                    <div className="flex flex-wrap gap-1 justify-center">
+                      {userAnswer.map((letter, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleRemoveLetter(index)}
+                          className="font-arabic text-lg bg-emerald-100 dark:bg-emerald-900/30 hover:bg-emerald-200 dark:hover:bg-emerald-900/50 text-emerald-700 dark:text-emerald-400 px-2 py-1 rounded-lg transition-colors border-2 border-emerald-300 dark:border-emerald-700 cursor-pointer"
+                        >
+                          {letter}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 )}
               </div>
             </div>
@@ -214,7 +319,7 @@ export const WordUnscrambleQuiz: React.FC<{ vocabularyList: Vocabulary[] }> = ({
                   <div>
                     <p className="text-lg font-semibold text-red-600 dark:text-red-400 mb-2">Jawaban Salah</p>
                     <p className="text-gray-700 dark:text-gray-300 mb-4">
-                      Jawaban yang benar: <span className="font-arabic text-2xl font-bold">{currentQuestion.correctAnswer}</span>
+                      Jawaban yang benar: <span className="font-arabic text-3xl font-bold">{applyArabicConnections(currentQuestion.correctAnswer)}</span>
                     </p>
                   </div>
                 )}
